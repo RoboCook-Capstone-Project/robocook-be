@@ -1,0 +1,56 @@
+generator client {
+  	provider = "prisma-client-js"
+}
+
+datasource db {
+	provider = "mysql"
+	url      = env("DATABASE_URL")
+}
+
+model User {
+	id    		Int     	@id @default(autoincrement())
+	email 		String  	@unique
+	password 	String		@default("PAsSWORD")
+	name  		String?
+	posts 		Post[]
+	galleries 	Gallery[] 
+	tokens 		Token[]
+}
+
+model Post {
+	id        Int      @id @default(autoincrement())
+	createdAt DateTime @default(now())
+	updatedAt DateTime @updatedAt
+	title     String
+	content   String?
+	imageUrl  String?
+	published Boolean  @default(false)
+	viewCount Int      @default(0)
+	author    User?    @relation(fields: [authorId], references: [id])
+	authorId  Int?
+}
+
+model Gallery {
+	id        Int      @id @default(autoincrement())
+	createdAt DateTime @default(now())
+	updatedAt DateTime @updatedAt
+	imageUrl  String
+	author    User?    @relation(fields: [authorId], references: [id])
+	authorId  Int?
+}
+
+model Token {
+	id        Int        @id @default(autoincrement())
+	token	  String     @unique
+	type      TokenType  @default(ACCESS)
+	expires   DateTime  
+	user      User       @relation(fields: [userId], references: [id])
+	userId    Int
+}
+
+enum TokenType {
+	ACCESS
+	REFRESH
+	RESET_PASSWORD
+	VERIFY_EMAIL
+}
