@@ -1,56 +1,38 @@
 generator client {
-  	provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-	provider = "mysql"
-	url      = env("DATABASE_URL")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-	id    		Int     	@id @default(autoincrement())
-	email 		String  	@unique
-	password 	String		@default("PAsSWORD")
-	name  		String?
-	posts 		Post[]
-	galleries 	Gallery[] 
-	tokens 		Token[]
+  id          Int             @id @default(autoincrement())
+  email       String          @unique
+  password    String
+  name        String
+  recipes     Recipe[]
+  favorites   UserFavorite[]
 }
 
-model Post {
-	id        Int      @id @default(autoincrement())
-	createdAt DateTime @default(now())
-	updatedAt DateTime @updatedAt
-	title     String
-	content   String?
-	imageUrl  String?
-	published Boolean  @default(false)
-	viewCount Int      @default(0)
-	author    User?    @relation(fields: [authorId], references: [id])
-	authorId  Int?
+model Recipe {
+  id           Int              @id @default(autoincrement())
+  title        String
+  author_id    Int
+  created      DateTime         @default(now())
+  updated      DateTime         @default(now())
+  ingredients  String
+  instructions String
+  image_url    String
+  author       User             @relation(fields: [author_id], references: [id])
+  favorites    UserFavorite[]
 }
 
-model Gallery {
-	id        Int      @id @default(autoincrement())
-	createdAt DateTime @default(now())
-	updatedAt DateTime @updatedAt
-	imageUrl  String
-	author    User?    @relation(fields: [authorId], references: [id])
-	authorId  Int?
-}
-
-model Token {
-	id        Int        @id @default(autoincrement())
-	token	  String     @unique
-	type      TokenType  @default(ACCESS)
-	expires   DateTime  
-	user      User       @relation(fields: [userId], references: [id])
-	userId    Int
-}
-
-enum TokenType {
-	ACCESS
-	REFRESH
-	RESET_PASSWORD
-	VERIFY_EMAIL
+model UserFavorite {
+  id          Int     @id @default(autoincrement())
+  user_id     Int
+  recipe_id   Int
+  user        User    @relation(fields: [user_id], references: [id])
+  recipe      Recipe  @relation(fields: [recipe_id], references: [id])
 }
