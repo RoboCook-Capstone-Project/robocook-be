@@ -38,28 +38,18 @@ const saveToken = async (token, userId, expires, type) => {
     return tokenDoc;
 };
 
-const verifyToken = async (token, type) => {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+const verifyToken = async (token) => {
+    try {
+        const payload = await jwt.verify(token, process.env.JWT_SECRET);
 
-    if (type === "ACCESS") {
+        if (!payload) {
+            throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid token!");
+        }
+
         return payload;
+    } catch (error) {
+        throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid token!");
     }
-
-    const tokenDoc = await prisma.token.findUnique({
-        where: {
-            token,
-            type,
-            user: {
-                id: payload.sub,
-            },
-        },
-    });
-
-    if (!tokenDoc) {
-        throw new ApiError(httpStatus.NOT_FOUND, "Token not found!");
-    }
-
-    return tokenDoc;
 };
 
 const generateAuthTokens = async (user) => {
