@@ -38,5 +38,5 @@ app.use(errorConverter);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-    console.log(`Example app listening on port ${PORT}`);
+    console.log(`Robocook app listening on port ${PORT} 😉`);
 });
