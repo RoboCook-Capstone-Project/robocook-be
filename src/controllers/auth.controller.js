@@ -55,11 +55,10 @@ const login = catchAsync(async (req, res) => {
         );
     }
 
-    const tokens = await tokenService.generateAuthTokens(user);
+    user.token = await tokenService.generateAuthTokens(user);
 
     return ApiResponse(res, httpStatus.OK, "Success login!", {
         user,
-        tokens,
     });
 });
 
