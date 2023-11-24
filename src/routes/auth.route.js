@@ -8,9 +8,12 @@ const authRouter = express.Router();
 
 authRouter
     .route("/register")
-    .post(validate(authValidation.createUser), authController.register);
+    .post(validate(authValidation.register), authController.register);
 
-authRouter.post("/login", authController.login);
+authRouter
+    .route("/login")
+    .post(validate(authValidation.login), authController.login);
+
 authRouter.post("/logout", authController.logout);
 authRouter.post("/refresh-tokens", authController.refreshTokens);
 authRouter.post("/verify-email", authController.verifyEmail);

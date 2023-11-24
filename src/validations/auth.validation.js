@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-const createUser = {
+const register = {
     body: Joi.object().keys({
         email: Joi.string().email().required(),
         password: Joi.string().min(8).required(),
@@ -8,4 +8,11 @@ const createUser = {
     }),
 };
 
-export default { createUser };
+const login = {
+    body: Joi.object().keys({
+        email: Joi.string().email().required(),
+        password: Joi.string().min(8).required(),
+    }),
+};
+
+export default { register, login };
