@@ -2,6 +2,7 @@ import httpStatus from "http-status";
 import catchAsync from "../utils/catchAsync.js";
 import { authService, tokenService } from "../services/index.js";
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
 
@@ -20,28 +21,23 @@ const register = catchAsync(async (req, res) => {
         throw new ApiError(httpStatus.BAD_REQUEST, "Email already exists!");
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await prisma.user.create({
         data: {
             email,
             name,
-            password,
+            password: hashedPassword,
+        },
+        select: {
+            name: true,
+            email: true,
         },
     });
 
-    const tokens = await tokenService.generateAuthTokens(user);
-
-    // Verify Email
-    await authService.sendVerificationEmail(user);
-
-    return ApiResponse(
-        res,
-        httpStatus.CREATED,
-        "Success create a user, please verify your email!",
-        {
-            user,
-            tokens,
-        }
-    );
+    return ApiResponse(res, httpStatus.CREATED, "Success register user!", {
+        user,
+    });
 });
 
 const login = catchAsync(async (req, res) => {
