@@ -2,9 +2,6 @@ import jwt from "jsonwebtoken";
 import moment from "moment";
 import httpStatus from "http-status";
 import ApiError from "../utils/ApiError.js";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
 
 const generateToken = (
     userId,
@@ -19,23 +16,6 @@ const generateToken = (
         type,
     };
     return jwt.sign(payload, secret);
-};
-
-const saveToken = async (token, userId, expires, type) => {
-    const tokenDoc = await prisma.token.create({
-        data: {
-            token,
-            userId,
-            expires: expires.toDate(),
-            type,
-        },
-    });
-
-    if (!tokenDoc) {
-        throw new ApiError(httpStatus.BAD_GATEWAY, "Error save token!");
-    }
-
-    return tokenDoc;
 };
 
 const verifyToken = async (token) => {
@@ -68,28 +48,8 @@ const generateAuthTokens = async (user) => {
     return accessToken;
 };
 
-const generateVerifyEmailToken = async (user) => {
-    const expires = moment().add(
-        process.env.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
-        "minutes"
-    );
-
-    const verifyEmailToken = generateToken(
-        user.id,
-        expires,
-        "VERIFY_EMAIL",
-        process.env.JWT_VERIFY_EMAIL_SECRET
-    );
-
-    await saveToken(verifyEmailToken, user.id, expires, "VERIFY_EMAIL");
-
-    return verifyEmailToken;
-};
-
 export default {
     generateToken,
-    saveToken,
     verifyToken,
     generateAuthTokens,
-    generateVerifyEmailToken,
 };

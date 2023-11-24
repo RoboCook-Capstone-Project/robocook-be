@@ -1,7 +1,7 @@
-import httpStatus from "http-status";
-import ApiError from "../utils/ApiError.js";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
+import httpStatus from "http-status";
+import ApiError from "../utils/ApiError.js";
 
 const prisma = new PrismaClient();
 
@@ -38,6 +38,7 @@ const loginUserWithEmailAndPassword = async (email, password) => {
 
     return user;
 };
+
 export default {
     loginUserWithEmailAndPassword,
 };
