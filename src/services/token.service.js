@@ -63,30 +63,19 @@ const verifyToken = async (token, type) => {
 };
 
 const generateAuthTokens = async (user) => {
-    const accessTokenExpires = moment().add(
-        process.env.JWT_ACCESS_EXPIRATION_MINUTES,
-        "minutes"
-    );
-    const accessToken = generateToken(user.id, accessTokenExpires, "ACCESS");
+    // const accessTokenExpires = moment().add(
+    //     process.env.JWT_ACCESS_EXPIRATION_MINUTES,
+    //     "minutes"
+    // );
 
-    const refreshTokenExpires = moment().add(
-        process.env.JWT_REFRESH_EXPIRATION_DAYS,
+    const accessTokenExpires = moment().add(
+        process.env.JWT_ACCESS_EXPIRATION_DAYS,
         "days"
     );
-    const refreshToken = generateToken(user.id, refreshTokenExpires, "REFRESH");
 
-    await saveToken(refreshToken, user.id, refreshTokenExpires, "REFRESH");
+    const accessToken = generateToken(user.id, accessTokenExpires, "ACCESS");
 
-    return {
-        access: {
-            token: accessToken,
-            expires: accessTokenExpires.toDate(),
-        },
-        refresh: {
-            token: refreshToken,
-            expires: refreshTokenExpires.toDate(),
-        },
-    };
+    return accessToken;
 };
 
 const generateVerifyEmailToken = async (user) => {
