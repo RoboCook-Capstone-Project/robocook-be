@@ -12,6 +12,10 @@ const getRecipes = catchAsync(async (req, res) => {
     size = parseInt(size);
     userId = parseInt(userId);
 
+    // TODO: Validate user id token!!
+
+    // TODO: Get result from ML model
+
     const result = await prisma.$transaction([
         prisma.recipe.findMany({
             take: size,
