@@ -6,7 +6,11 @@ import catchAsync from "../utils/catchAsync.js";
 const prisma = new PrismaClient();
 
 const getRecipes = catchAsync(async (req, res) => {
-    const { page = 1, size = 10 } = req.query;
+    let { page = 1, size = 10, user_id: userId } = req.query;
+
+    page = parseInt(page);
+    size = parseInt(size);
+    userId = parseInt(userId);
 
     const result = await prisma.$transaction([
         prisma.recipe.findMany({
@@ -26,7 +30,7 @@ const getRecipes = catchAsync(async (req, res) => {
     ]);
 
     const recipes = result[0].map((recipe) => ({
-        id: recipe,
+        id: recipe.id,
         title: recipe.title,
         author: recipe.author?.name || null,
         image_url: recipe.image_url,
@@ -34,7 +38,7 @@ const getRecipes = catchAsync(async (req, res) => {
         steps: recipe.steps,
     }));
 
-    const total = result[1];
+    const total = Math.ceil(result[1] / size);
 
     return ApiResponse(res, httpStatus.OK, "Success get recipes data!", {
         recipeList: recipes,
