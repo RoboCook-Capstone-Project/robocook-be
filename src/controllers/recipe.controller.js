@@ -6,6 +6,7 @@ import catchAsync from "../utils/catchAsync.js";
 const prisma = new PrismaClient();
 
 const getRecipes = catchAsync(async (req, res) => {
+    const userId = req.user_id;
     let { page = 1, size = 10 } = req.query;
 
     page = parseInt(page);
