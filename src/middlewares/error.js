@@ -22,12 +22,8 @@ const errorConverter = (error, req, res, next) => {
 
 const errorHandler = (error, req, res, next) => {
     res.status(error.statusCode || 500).json({
-        timestamp: Date.now(),
-        status: error.statusCode,
-        error: error.error,
+        error: true,
         message: error.message,
-        stack: error.stack,
-        path: req.path,
     });
 };
 

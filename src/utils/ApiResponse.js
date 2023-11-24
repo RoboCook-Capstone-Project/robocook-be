@@ -1,10 +1,21 @@
-const ApiResponse = (res, statusCode, message, data, meta) => {
+const ApiResponse = (
+    res,
+    statusCode,
+    message,
+    {
+        recipeList = undefined,
+        recipe = undefined,
+        pageMeta = undefined,
+        user = undefined,
+    } = {}
+) => {
     const response = {
-        timestamp: Date.now(),
-        status: statusCode,
+        error: !(statusCode >= 200 && statusCode <= 299),
         message: message || httpStatus[`${statusCode}_MESSAGE`],
-        data: data,
-        meta: meta,
+        list_recipe: recipeList,
+        recipe: recipe,
+        page_meta: pageMeta,
+        user: user,
     };
 
     res.status(statusCode).json(response);
