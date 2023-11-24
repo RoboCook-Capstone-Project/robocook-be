@@ -6,11 +6,10 @@ import catchAsync from "../utils/catchAsync.js";
 const prisma = new PrismaClient();
 
 const getRecipes = catchAsync(async (req, res) => {
-    let { page = 1, size = 10, user_id: userId } = req.query;
+    let { page = 1, size = 10 } = req.query;
 
     page = parseInt(page);
     size = parseInt(size);
-    userId = parseInt(userId);
 
     // TODO: Validate user id token!!
 
