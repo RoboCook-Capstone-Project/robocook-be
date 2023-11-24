@@ -3,6 +3,7 @@ import tokenService from "./token.service.js";
 import ApiError from "../utils/ApiError.js";
 import { PrismaClient } from "@prisma/client";
 import nodemailer from "nodemailer";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -11,14 +12,31 @@ const loginUserWithEmailAndPassword = async (email, password) => {
         where: {
             email,
         },
+        select: {
+            id: true,
+            email: true,
+            name: true,
+            password: true,
+        },
     });
 
-    if (!user || !(user.password === password)) {
+    if (!user) {
         throw new ApiError(
             httpStatus.UNAUTHORIZED,
             "Incorrect email or password"
         );
     }
+
+    const passwordMatch = await bcrypt.compare(password, user?.password);
+
+    if (!passwordMatch) {
+        throw new ApiError(
+            httpStatus.UNAUTHORIZED,
+            "Incorrect email or password"
+        );
+    }
+
+    user.password = undefined;
 
     return user;
 };
