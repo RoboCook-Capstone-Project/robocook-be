@@ -62,21 +62,4 @@ const login = catchAsync(async (req, res) => {
     });
 });
 
-const logout = catchAsync(async (req, res) => {
-    await authService.logout(req.body.refreshToken);
-    return ApiResponse(res, httpStatus.OK, "Success logout!");
-});
-
-const refreshTokens = catchAsync(async (req, res) => {
-    const tokens = await authService.refreshAuth(req.body.refreshToken);
-    return ApiResponse(res, httpStatus.OK, "Success refresh token!", {
-        ...tokens,
-    });
-});
-
-const verifyEmail = catchAsync(async (req, res) => {
-    await authService.verifyEmail(req.body.token);
-    return ApiResponse(res, httpStatus.OK, "Success verify email!");
-});
-
-export default { register, login, logout, refreshTokens, verifyEmail };
+export default { register, login };
