@@ -23,7 +23,7 @@ model Recipe {
   created      DateTime         @default(now())
   updated      DateTime         @default(now())
   ingredients  String
-  instructions String
+  steps        String
   image_url    String
   author       User             @relation(fields: [author_id], references: [id])
   favorites    UserFavorite[]
