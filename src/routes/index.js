@@ -3,6 +3,7 @@ import express from "express";
 import authRouter from "./auth.route.js";
 import userRouter from "./user.route.js";
 import postRouter from "./post.route.js";
+import recipeRouter from "./recipe.route.js";
 import galleryRouter from "./gallery.route.js";
 
 const router = express.Router();
@@ -19,6 +20,10 @@ const defaultRoutes = [
     {
         path: "/posts",
         route: postRouter,
+    },
+    {
+        path: "/recipes",
+        route: recipeRouter,
     },
     {
         path: "/galleries",
