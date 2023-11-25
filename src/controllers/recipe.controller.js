@@ -50,6 +50,7 @@ const getRecipes = catchAsync(async (req, res) => {
     });
 });
 
+
 const getSearchRecipes = catchAsync(async (req, res) => {
     let { page = 1, size = 10, keyword } = req.query;
 
