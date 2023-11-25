@@ -61,9 +61,18 @@ const getSearchRecipes = catchAsync(async (req, res) => {
             take: size,
             skip: (page - 1) * size,
             where: {
-                title: {
-                    contains: keyword,
-                },
+                OR: [
+                    {
+                        title: {
+                            contains: keyword,
+                        },
+                    },
+                    {
+                        ingredients: {
+                            contains: keyword,
+                        },
+                    },
+                ],
             },
             select: {
                 id: true,
@@ -77,9 +86,18 @@ const getSearchRecipes = catchAsync(async (req, res) => {
 
         prisma.recipe.count({
             where: {
-                title: {
-                    contains: keyword,
-                },
+                OR: [
+                    {
+                        title: {
+                            contains: keyword,
+                        },
+                    },
+                    {
+                        ingredients: {
+                            contains: keyword,
+                        },
+                    },
+                ],
             },
         }),
     ]);
