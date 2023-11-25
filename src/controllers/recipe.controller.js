@@ -50,4 +50,48 @@ const getRecipes = catchAsync(async (req, res) => {
     });
 });
 
-export default { getRecipes };
+const getFusionRecipes = catchAsync(async (req, res) => {
+    const userId = req.user_id;
+    let { first_recipe_id: firstRecipeId, second_recipe_id: secondRecipeId } =
+        req.query;
+
+    firstRecipeId = parseInt(firstRecipeId);
+    secondRecipeId = parseInt(secondRecipeId);
+
+    const result = await prisma.$transaction([
+        prisma.recipe.findMany({
+            take: 10,
+            skip: 0,
+            select: {
+                id: true,
+                title: true,
+                ingredients: true,
+                steps: true,
+                image_url: true,
+                author: true, // Include the author details
+            },
+        }),
+
+        prisma.recipe.count(),
+    ]);
+
+    const recipes = result[0].map((recipe) => ({
+        id: recipe.id,
+        title: recipe.title,
+        author: recipe.author?.name || null,
+        image_url: recipe.image_url,
+        ingredients: recipe.ingredients,
+        steps: recipe.steps,
+    }));
+
+    return ApiResponse(
+        res,
+        httpStatus.OK,
+        "Success get recipes data from fusion!",
+        {
+            recipeList: recipes,
+        }
+    );
+});
+
+export default { getRecipes, getFusionRecipes };

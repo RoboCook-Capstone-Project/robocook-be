@@ -7,6 +7,14 @@ const forYouPage = {
     }),
 };
 
+const fusionRecipes = {
+    query: Joi.object().keys({
+        first_recipe_id: Joi.number().integer().required(),
+        second_recipe_id: Joi.number().integer().required(),
+    }),
+};
+
 export default {
     forYouPage,
+    fusionRecipes,
 };
