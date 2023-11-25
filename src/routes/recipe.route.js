@@ -15,4 +15,20 @@ recipeRouter
         recipeController.getRecipes
     );
 
+recipeRouter
+    .route("/search")
+    .get(
+        auth,
+        validate(recipeValidation.searchRecipes),
+        recipeController.getSearchRecipes
+    );
+
+recipeRouter
+    .route("/fusion")
+    .get(
+        auth,
+        validate(recipeValidation.fusionRecipes),
+        recipeController.getFusionRecipes
+    );
+
 export default recipeRouter;

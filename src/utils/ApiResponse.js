@@ -12,7 +12,7 @@ const ApiResponse = (
     const response = {
         error: !(statusCode >= 200 && statusCode <= 299),
         message: message || httpStatus[`${statusCode}_MESSAGE`],
-        list_recipe: recipeList,
+        recipe_list: recipeList,
         recipe: recipe,
         page_meta: pageMeta,
         user: user,
