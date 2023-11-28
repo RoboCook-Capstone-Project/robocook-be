@@ -63,11 +63,8 @@ const createRecipe = catchAsync(async (req, res) => {
         throw new ApiError(httpStatus.BAD_REQUEST, "Image is required!");
     }
 
-    ingredients = ingredients.replaceAll("\n", "--");
-    ingredients = ingredients.replaceAll(".", "--");
-
-    steps = steps.replaceAll("\n", "--");
-    steps = steps.replaceAll(".", "--");
+    ingredients = ingredients.replaceAll(/\n|\./g, "--");
+    steps = steps.replaceAll(/\n|\./g, "--");
 
     let recipe = await prisma.recipe.create({
         data: {
@@ -83,7 +80,7 @@ const createRecipe = catchAsync(async (req, res) => {
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error create recipe!");
     }
 
-    const recipe_author = await prisma.user.findUnique({
+    const author = await prisma.user.findUnique({
         where: {
             id: recipe.author_id,
         },
@@ -92,20 +89,17 @@ const createRecipe = catchAsync(async (req, res) => {
         },
     });
 
-    recipe = (({ 
-        id,
-        title,
-        image_url,
-        ingredients,
-        steps 
-    }) => ({ 
-        id,
-        title,
-        author: recipe_author.name,
-        image_url,
-        ingredients,
-        steps 
+    recipe = ((recipe) => ({
+        id: recipe.id,
+        title: recipe.title,
+        author: author.name,
+        image_url: recipe.image_url,
+        ingredients: recipe.ingredients,
+        steps: recipe.steps,
     }))(recipe);
+
+    recipe.ingredients = recipe.ingredients.replaceAll("--", "\n");
+    recipe.steps = recipe.steps.replaceAll("--", "\n");
 
     return ApiResponse(
         res,
