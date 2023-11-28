@@ -7,6 +7,12 @@ const forYouPage = {
     }),
 };
 
+const getRecipe = {
+    params: Joi.object().keys({
+        id: Joi.number().required(),
+    }),
+};
+
 const searchRecipes = {
     query: Joi.object().keys({
         keyword: Joi.string().min(1).required(),
@@ -24,6 +30,7 @@ const fusionRecipes = {
 
 export default {
     forYouPage,
+    getRecipe,
     searchRecipes,
     fusionRecipes,
 };
