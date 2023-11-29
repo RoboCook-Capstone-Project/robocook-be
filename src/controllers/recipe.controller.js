@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import httpStatus from "http-status";
 import ApiResponse from "../utils/ApiResponse.js";
 import catchAsync from "../utils/catchAsync.js";
+import ApiError from "../utils/ApiError.js";
 
 const prisma = new PrismaClient();
 
@@ -175,4 +176,42 @@ const getFusionRecipes = catchAsync(async (req, res) => {
     );
 });
 
-export default { getRecipes, getSearchRecipes, getFusionRecipes };
+const addFavoriteRecipe = catchAsync(async (req, res) => {
+    const userId = req.user_id;
+    let { recipe_id } = req.body;
+
+    const recipe = await prisma.recipe.findUnique({
+        where: {
+            id: recipe_id
+        },
+    });
+
+    if (!recipe) {
+        throw new ApiError(httpStatus.NOT_FOUND, `No recipe found by id ${recipe_id}!`);
+    }
+
+    const user_favorite = await prisma.userFavorite.create({
+        data: {
+            recipe_id,
+            user_id: userId
+        },
+    });
+
+    if (!user_favorite) {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error adding recipe to favorites!");
+    }
+
+    return ApiResponse(
+        res,
+        httpStatus.CREATED,
+        "Added recipe to favorites successfully",
+    );
+
+});
+
+export default { 
+    getRecipes, 
+    getSearchRecipes, 
+    getFusionRecipes,
+    addFavoriteRecipe,
+};
