@@ -54,36 +54,27 @@ const getRecipes = catchAsync(async (req, res) => {
 const getRecipe = catchAsync(async (req, res) => {
     const { id } = req.params;
 
-    let recipe = await prisma.recipe.findUnique({
+    const recipe = await prisma.recipe.findUnique({
         where: {
             id: id
+        },
+        select: {
+            id: true,
+            title: true,
+            author: true,
+            image_url: true,
+            ingredients: true,
+            steps: true,
         },
     });
 
     if (!recipe) {
-        throw new ApiError(httpStatus.NOT_FOUND, "Recipe of id "+ id +" not found!");
+        throw new ApiError(httpStatus.NOT_FOUND, `No recipe found by id ${id}!`);
     }
 
     recipe.ingredients = recipe.ingredients.replaceAll("--", "\n");
     recipe.steps = recipe.steps.replaceAll("--", "\n");
-
-    const author = await prisma.user.findUnique({
-        where: {
-            id: recipe.author_id,
-        },
-        select: {
-            name: true,
-        },
-    });
-
-    recipe = ((recipe) => ({
-        id: recipe.id,
-        title: recipe.title,
-        author: author.name,
-        image_url: recipe.image_url,
-        ingredients: recipe.ingredients,
-        steps: recipe.steps,
-    }))(recipe);
+    recipe.author = recipe.author.name;
 
     return ApiResponse(
         res,
