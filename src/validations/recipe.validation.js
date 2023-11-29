@@ -9,7 +9,7 @@ const forYouPage = {
 
 const getRecipe = {
     params: Joi.object().keys({
-        id: Joi.number().required(),
+        id: Joi.number().integer().required(),
     }),
 };
 
