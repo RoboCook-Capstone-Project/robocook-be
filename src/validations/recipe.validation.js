@@ -22,8 +22,15 @@ const fusionRecipes = {
     }),
 };
 
+const addFavoriteRecipe = {
+    body: Joi.object().keys({
+        recipe_id: Joi.number().integer().required(),
+    }),
+};
+
 export default {
     forYouPage,
     searchRecipes,
     fusionRecipes,
+    addFavoriteRecipe,
 };
