@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import httpStatus from "http-status";
 import ApiResponse from "../utils/ApiResponse.js";
 import catchAsync from "../utils/catchAsync.js";
+import ApiError from "../utils/ApiError.js";
 
 const prisma = new PrismaClient();
 
@@ -49,6 +50,43 @@ const getRecipes = catchAsync(async (req, res) => {
         pageMeta: { current_page: page, total_page: total, page_size: size },
     });
 });
+
+const getToasty = catchAsync(async (req, res) => {
+    const recipe_count = await prisma.recipe.count();
+    const random_recipe = Math.floor((Math.random() * recipe_count) + 1);
+
+    let recipe = await prisma.recipe.findMany({
+        take: 1,
+        skip: random_recipe - 1,
+        select: {
+            id: true,
+            title: true,
+            author: true,
+            image_url: true,
+            ingredients: true,
+            steps: true,
+        },
+    });
+
+    recipe = recipe.at(0);
+    
+    if (!recipe) {
+        throw new ApiError(httpStatus.NOT_FOUND, "No recipe found!");
+    }
+
+    recipe.ingredients = recipe.ingredients.replaceAll("--", "\n");
+    recipe.steps = recipe.steps.replaceAll("--", "\n");
+    recipe.author = recipe.author.name;
+
+    return ApiResponse(
+        res,
+        httpStatus.OK,
+        "Recipe fetched successfully",
+        {
+            recipe : recipe
+        }
+    );
+})
 
 
 const getSearchRecipes = catchAsync(async (req, res) => {
@@ -175,4 +213,9 @@ const getFusionRecipes = catchAsync(async (req, res) => {
     );
 });
 
-export default { getRecipes, getSearchRecipes, getFusionRecipes };
+export default { 
+    getRecipes,
+    getToasty,
+    getSearchRecipes, 
+    getFusionRecipes 
+};
