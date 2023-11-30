@@ -361,6 +361,8 @@ const getFavorites = catchAsync(async (req, res) => {
         }
     );
 
+});
+
 const addFavoriteRecipe = catchAsync(async (req, res) => {
     const userId = req.user_id;
     let { recipe_id } = req.body;
