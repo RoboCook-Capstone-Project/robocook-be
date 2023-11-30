@@ -24,14 +24,6 @@ recipeRouter
     );
 
 recipeRouter
-    .route("/:id")
-    .get(
-        auth,
-        validate(recipeValidation.getRecipe),
-        recipeController.getRecipe
-  );
-
-recipeRouter
     .route("/toasty")
     .get(
         auth,
@@ -60,6 +52,7 @@ recipeRouter
         auth,
         validate(recipeValidation.getFavorites),
         recipeController.getFavorites
+    );
 
 recipeRouter
     .route("/favorites")
@@ -68,5 +61,13 @@ recipeRouter
         validate(recipeValidation.addFavoriteRecipe),
         recipeController.addFavoriteRecipe
     );
+
+recipeRouter
+    .route("/:id")
+    .get(
+        auth,
+        validate(recipeValidation.getRecipe),
+        recipeController.getRecipe
+  );
 
 export default recipeRouter;
