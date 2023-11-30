@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import httpStatus from "http-status";
 import ApiResponse from "../utils/ApiResponse.js";
 import catchAsync from "../utils/catchAsync.js";
+import ApiError from "../utils/ApiError.js";
 
 const prisma = new PrismaClient();
 
@@ -175,4 +176,70 @@ const getFusionRecipes = catchAsync(async (req, res) => {
     );
 });
 
-export default { getRecipes, getSearchRecipes, getFusionRecipes };
+const getFavorites = catchAsync(async (req, res) => {
+    const userId = req.user_id;
+    let { page = 1, size = 10 } = req.query;
+
+    page = parseInt(page);
+    size = parseInt(size);
+
+    const result = await prisma.$transaction([
+        prisma.userFavorite.findMany({
+            take: size,
+            skip: (page - 1) * size,
+            where: {
+                user_id: userId
+            },
+            select: {
+                recipe: true
+            },
+        }),
+
+        prisma.userFavorite.count({
+            where: {
+                user_id: userId
+            }
+        }),
+    ]);
+
+    const recipes = result[0].map((favorite) => ({
+        id: favorite.recipe.id,
+        title: favorite.recipe.title,
+        author: favorite.recipe.author_id,
+        image_url: favorite.recipe.image_url,
+        ingredients: favorite.recipe.ingredients,
+        steps: favorite.recipe.steps,
+    }));
+
+    for (let i = 0; i < recipes.length; i++) {
+        const recipe = recipes[i];
+        const author = await prisma.user.findUnique({
+            where: {
+                id: recipe.author
+            },
+            select: {
+                name: true
+            }
+        });
+        recipe.author = author.name;
+    }
+
+    const total = Math.ceil(result[1] / size);
+
+    return ApiResponse(res, httpStatus.OK,
+        recipes.length
+            ? "Recipes fetched successfully"
+            : "No favorite recipes yet!", 
+        {
+            recipeList: recipes,
+            pageMeta: { current_page: page, total_page: total, page_size: size },
+        }
+    );
+});
+
+export default { 
+    getRecipes,
+    getSearchRecipes,
+    getFusionRecipes,
+    getFavorites,
+};
