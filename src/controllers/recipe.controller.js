@@ -190,6 +190,21 @@ const addFavoriteRecipe = catchAsync(async (req, res) => {
         throw new ApiError(httpStatus.NOT_FOUND, `No recipe found by id ${recipe_id}!`);
     }
 
+    const favorite = await prisma.userFavorite.findFirst({
+        where: {
+            recipe_id,
+            user_id: userId
+        }
+    });
+
+    if (favorite) {
+        return ApiResponse(
+            res,
+            httpStatus.OK,
+            "Recipe already exists in favorites",
+        );
+    }
+
     const user_favorite = await prisma.userFavorite.create({
         data: {
             recipe_id,
