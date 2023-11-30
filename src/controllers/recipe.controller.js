@@ -300,11 +300,60 @@ const getFusionRecipes = catchAsync(async (req, res) => {
     );
 });
 
+const addFavoriteRecipe = catchAsync(async (req, res) => {
+    const userId = req.user_id;
+    let { recipe_id } = req.body;
+
+    const recipe = await prisma.recipe.findUnique({
+        where: {
+            id: recipe_id
+        },
+    });
+
+    if (!recipe) {
+        throw new ApiError(httpStatus.NOT_FOUND, `No recipe found by id ${recipe_id}!`);
+    }
+
+    const favorite = await prisma.userFavorite.findFirst({
+        where: {
+            recipe_id,
+            user_id: userId
+        }
+    });
+
+    if (favorite) {
+        return ApiResponse(
+            res,
+            httpStatus.OK,
+            "Recipe already exists in favorites",
+        );
+    }
+
+    const user_favorite = await prisma.userFavorite.create({
+        data: {
+            recipe_id,
+            user_id: userId
+        },
+    });
+
+    if (!user_favorite) {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error adding recipe to favorites!");
+    }
+
+    return ApiResponse(
+        res,
+        httpStatus.CREATED,
+        "Added recipe to favorites successfully",
+    );
+
+});
+
 export default { 
     getRecipes,
     createRecipe,
     getRecipe,
     getToasty,
     getSearchRecipes, 
-    getFusionRecipes 
+    getFusionRecipes,
+    addFavoriteRecipe,
 };
