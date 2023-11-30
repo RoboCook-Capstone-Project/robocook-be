@@ -22,8 +22,16 @@ const fusionRecipes = {
     }),
 };
 
+const getFavorites = {
+    query: Joi.object().keys({
+        page: Joi.number().integer(),
+        size: Joi.number().integer(),
+    }),
+};
+
 export default {
     forYouPage,
     searchRecipes,
     fusionRecipes,
+    getFavorites,
 };
