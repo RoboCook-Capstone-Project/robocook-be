@@ -31,4 +31,12 @@ recipeRouter
         recipeController.getFusionRecipes
     );
 
+recipeRouter
+    .route("/favorites")
+    .get(
+        auth,
+        validate(recipeValidation.getFavorites),
+        recipeController.getFavorites
+    );
+
 export default recipeRouter;
