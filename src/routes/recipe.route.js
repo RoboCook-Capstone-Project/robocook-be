@@ -16,6 +16,14 @@ recipeRouter
     );
 
 recipeRouter
+    .route("/")
+    .post(
+        auth,
+        validate(recipeValidation.createRecipe),
+        recipeController.createRecipe
+    );
+
+recipeRouter
     .route("/search")
     .get(
         auth,

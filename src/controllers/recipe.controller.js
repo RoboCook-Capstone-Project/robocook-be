@@ -2,6 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import httpStatus from "http-status";
 import ApiResponse from "../utils/ApiResponse.js";
 import catchAsync from "../utils/catchAsync.js";
+import ApiError from "../utils/ApiError.js";
+import { uploadObject } from "../utils/cloudStorage.js";
 
 const prisma = new PrismaClient();
 
@@ -50,6 +52,56 @@ const getRecipes = catchAsync(async (req, res) => {
     });
 });
 
+const createRecipe = catchAsync(async (req, res) => {
+    const userId = req.user_id;
+    let { title, ingredients, steps } = req.body;
+    let image_url = null;
+
+    if (req.file) {
+        image_url = await uploadObject(req.file, "recipe-thumbnails/");
+    } else {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Image is required!");
+    }
+
+    ingredients = ingredients.replaceAll(/\n|\./g, "--");
+    steps = steps.replaceAll(/\n|\./g, "--");
+
+    const recipe = await prisma.recipe.create({
+        data: {
+            title,
+            author_id: userId,
+            ingredients,
+            steps,
+            image_url,
+        },
+        select: {
+            id: true,
+            title: true,
+            author: true,
+            image_url: true,
+            ingredients: true,
+            steps: true,
+        },
+    });
+
+    if (!recipe) {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error create recipe!");
+    }
+
+    recipe.ingredients = recipe.ingredients.replaceAll("--", "\n");
+    recipe.steps = recipe.steps.replaceAll("--", "\n");
+    recipe.author = recipe.author.name;
+
+    return ApiResponse(
+        res,
+        httpStatus.CREATED,
+        "Recipe created successfully",
+        {
+            recipe : recipe
+        }
+    );
+
+});
 
 const getSearchRecipes = catchAsync(async (req, res) => {
     let { page = 1, size = 10, keyword } = req.query;
@@ -175,4 +227,9 @@ const getFusionRecipes = catchAsync(async (req, res) => {
     );
 });
 
-export default { getRecipes, getSearchRecipes, getFusionRecipes };
+export default { 
+    getRecipes, 
+    createRecipe,
+    getSearchRecipes, 
+    getFusionRecipes 
+};
