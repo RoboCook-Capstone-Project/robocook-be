@@ -24,6 +24,14 @@ recipeRouter
     );
 
 recipeRouter
+    .route("/:id")
+    .get(
+        auth,
+        validate(recipeValidation.getRecipe),
+        recipeController.getRecipe
+  );
+
+recipeRouter
     .route("/search")
     .get(
         auth,
