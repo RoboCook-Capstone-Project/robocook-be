@@ -56,6 +56,13 @@ recipeRouter
 
 recipeRouter
     .route("/favorites")
+    .get(
+        auth,
+        validate(recipeValidation.getFavorites),
+        recipeController.getFavorites
+
+recipeRouter
+    .route("/favorites")
     .post(
         auth,
         validate(recipeValidation.addFavoriteRecipe),
