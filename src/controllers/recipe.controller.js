@@ -139,6 +139,43 @@ const getRecipe = catchAsync(async (req, res) => {
   
 });
 
+const getToasty = catchAsync(async (req, res) => {
+    const recipe_count = await prisma.recipe.count();
+    const random_recipe = Math.floor((Math.random() * recipe_count) + 1);
+
+    let recipe = await prisma.recipe.findMany({
+        take: 1,
+        skip: random_recipe - 1,
+        select: {
+            id: true,
+            title: true,
+            author: true,
+            image_url: true,
+            ingredients: true,
+            steps: true,
+        },
+    });
+
+    recipe = recipe.at(0);
+    
+    if (!recipe) {
+        throw new ApiError(httpStatus.NOT_FOUND, "No recipe found!");
+    }
+
+    recipe.ingredients = recipe.ingredients.replaceAll("--", "\n");
+    recipe.steps = recipe.steps.replaceAll("--", "\n");
+    recipe.author = recipe.author.name;
+
+    return ApiResponse(
+        res,
+        httpStatus.OK,
+        "Recipe fetched successfully",
+        {
+            recipe : recipe
+        }
+    );
+});
+
 const getSearchRecipes = catchAsync(async (req, res) => {
     let { page = 1, size = 10, keyword } = req.query;
 
@@ -267,6 +304,7 @@ export default {
     getRecipes,
     createRecipe,
     getRecipe,
+    getToasty,
     getSearchRecipes, 
     getFusionRecipes 
 };

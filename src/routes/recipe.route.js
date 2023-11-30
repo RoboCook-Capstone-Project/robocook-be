@@ -32,6 +32,13 @@ recipeRouter
   );
 
 recipeRouter
+    .route("/toasty")
+    .get(
+        auth,
+        recipeController.getToasty
+    );
+
+recipeRouter
     .route("/search")
     .get(
         auth,
