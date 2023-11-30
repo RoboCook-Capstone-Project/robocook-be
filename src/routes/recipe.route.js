@@ -16,6 +16,29 @@ recipeRouter
     );
 
 recipeRouter
+    .route("/")
+    .post(
+        auth,
+        validate(recipeValidation.createRecipe),
+        recipeController.createRecipe
+    );
+
+recipeRouter
+    .route("/:id")
+    .get(
+        auth,
+        validate(recipeValidation.getRecipe),
+        recipeController.getRecipe
+  );
+
+recipeRouter
+    .route("/toasty")
+    .get(
+        auth,
+        recipeController.getToasty
+    );
+
+recipeRouter
     .route("/search")
     .get(
         auth,

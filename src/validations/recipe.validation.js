@@ -7,6 +7,20 @@ const forYouPage = {
     }),
 };
 
+const createRecipe = {
+    body: Joi.object().keys({
+        title: Joi.string().required(),
+        ingredients: Joi.string().required(),
+        steps: Joi.string().required(),
+    }),
+};
+
+const getRecipe = {
+    params: Joi.object().keys({
+        id: Joi.number().integer().required(),
+    }),
+};
+
 const searchRecipes = {
     query: Joi.object().keys({
         keyword: Joi.string().min(1).required(),
@@ -30,6 +44,8 @@ const addFavoriteRecipe = {
 
 export default {
     forYouPage,
+    createRecipe,
+    getRecipe,
     searchRecipes,
     fusionRecipes,
     addFavoriteRecipe,
