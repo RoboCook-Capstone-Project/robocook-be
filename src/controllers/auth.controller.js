@@ -48,8 +48,6 @@ const login = catchAsync(async (req, res) => {
         password
     );
 
-    console.log(user);
-
     if (!user) {
         throw new ApiError(
             httpStatus.UNAUTHORIZED,
