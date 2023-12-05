@@ -7,6 +7,20 @@ const forYouPage = {
     }),
 };
 
+const createRecipe = {
+    body: Joi.object().keys({
+        title: Joi.string().required(),
+        ingredients: Joi.string().required(),
+        steps: Joi.string().required(),
+    }),
+};
+
+const getRecipe = {
+    params: Joi.object().keys({
+        id: Joi.number().integer().required(),
+    }),
+};
+
 const searchRecipes = {
     query: Joi.object().keys({
         keyword: Joi.string().min(1).required(),
@@ -22,8 +36,25 @@ const fusionRecipes = {
     }),
 };
 
+const getFavorites = {
+    query: Joi.object().keys({
+        page: Joi.number().integer(),
+        size: Joi.number().integer(),
+    }),
+};
+
+const addFavoriteRecipe = {
+    body: Joi.object().keys({
+        recipe_id: Joi.number().integer().required(),
+    }),
+};
+
 export default {
     forYouPage,
+    createRecipe,
+    getRecipe,
     searchRecipes,
     fusionRecipes,
+    getFavorites,
+    addFavoriteRecipe,
 };
