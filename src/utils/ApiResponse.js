@@ -6,7 +6,8 @@ const ApiResponse = (
         recipeList = undefined,
         recipe = undefined,
         pageMeta = undefined,
-        user = undefined,
+        loginResult = undefined,
+        registerResult = undefined,
     } = {}
 ) => {
     const response = {
@@ -15,7 +16,8 @@ const ApiResponse = (
         list_recipe: recipeList,
         recipe: recipe,
         page_meta: pageMeta,
-        user: user,
+        login_result: loginResult,
+        register_result: registerResult,
     };
 
     res.status(statusCode).json(response);
