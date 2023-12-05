@@ -85,22 +85,19 @@ const createRecipe = catchAsync(async (req, res) => {
     });
 
     if (!recipe) {
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error create recipe!");
+        throw new ApiError(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            "Error create recipe!"
+        );
     }
 
     recipe.ingredients = recipe.ingredients.replaceAll("--", "\n");
     recipe.steps = recipe.steps.replaceAll("--", "\n");
     recipe.author = recipe.author.name;
 
-    return ApiResponse(
-        res,
-        httpStatus.CREATED,
-        "Recipe created successfully",
-        {
-            recipe : recipe
-        }
-    );
-
+    return ApiResponse(res, httpStatus.CREATED, "Recipe created successfully", {
+        recipe: recipe,
+    });
 });
 
 const getRecipe = catchAsync(async (req, res) => {
@@ -108,7 +105,7 @@ const getRecipe = catchAsync(async (req, res) => {
 
     const recipe = await prisma.recipe.findUnique({
         where: {
-            id: id
+            id: id,
         },
         select: {
             id: true,
@@ -121,27 +118,24 @@ const getRecipe = catchAsync(async (req, res) => {
     });
 
     if (!recipe) {
-        throw new ApiError(httpStatus.NOT_FOUND, `No recipe found by id ${id}!`);
+        throw new ApiError(
+            httpStatus.NOT_FOUND,
+            `No recipe found by id ${id}!`
+        );
     }
 
     recipe.ingredients = recipe.ingredients.replaceAll("--", "\n");
     recipe.steps = recipe.steps.replaceAll("--", "\n");
     recipe.author = recipe.author.name;
 
-    return ApiResponse(
-        res,
-        httpStatus.OK,
-        "Recipe fetched successfully",
-        {
-            recipe : recipe
-        }
-    );
-  
+    return ApiResponse(res, httpStatus.OK, "Recipe fetched successfully", {
+        recipe: recipe,
+    });
 });
 
 const getToasty = catchAsync(async (req, res) => {
     const recipe_count = await prisma.recipe.count();
-    const random_recipe = Math.floor((Math.random() * recipe_count) + 1);
+    const random_recipe = Math.floor(Math.random() * recipe_count + 1);
 
     let recipe = await prisma.recipe.findMany({
         take: 1,
@@ -157,7 +151,7 @@ const getToasty = catchAsync(async (req, res) => {
     });
 
     recipe = recipe.at(0);
-    
+
     if (!recipe) {
         throw new ApiError(httpStatus.NOT_FOUND, "No recipe found!");
     }
@@ -166,14 +160,9 @@ const getToasty = catchAsync(async (req, res) => {
     recipe.steps = recipe.steps.replaceAll("--", "\n");
     recipe.author = recipe.author.name;
 
-    return ApiResponse(
-        res,
-        httpStatus.OK,
-        "Recipe fetched successfully",
-        {
-            recipe : recipe
-        }
-    );
+    return ApiResponse(res, httpStatus.OK, "Recipe fetched successfully", {
+        recipe: recipe,
+    });
 });
 
 const getSearchRecipes = catchAsync(async (req, res) => {
@@ -300,7 +289,6 @@ const getFusionRecipes = catchAsync(async (req, res) => {
     );
 });
 
-
 const getFavorites = catchAsync(async (req, res) => {
     const userId = req.user_id;
     let { page = 1, size = 10 } = req.query;
@@ -313,17 +301,17 @@ const getFavorites = catchAsync(async (req, res) => {
             take: size,
             skip: (page - 1) * size,
             where: {
-                user_id: userId
+                user_id: userId,
             },
             select: {
-                recipe: true
+                recipe: true,
             },
         }),
 
         prisma.userFavorite.count({
             where: {
-                user_id: userId
-            }
+                user_id: userId,
+            },
         }),
     ]);
 
@@ -340,27 +328,32 @@ const getFavorites = catchAsync(async (req, res) => {
         const recipe = recipes[i];
         const author = await prisma.user.findUnique({
             where: {
-                id: recipe.author
+                id: recipe.author,
             },
             select: {
-                name: true
-            }
+                name: true,
+            },
         });
         recipe.author = author.name;
     }
 
     const total = Math.ceil(result[1] / size);
 
-    return ApiResponse(res, httpStatus.OK,
+    return ApiResponse(
+        res,
+        httpStatus.OK,
         recipes.length
             ? "Recipes fetched successfully"
-            : "No favorite recipes yet!", 
+            : "No favorite recipes yet!",
         {
             recipeList: recipes,
-            pageMeta: { current_page: page, total_page: total, page_size: size },
+            pageMeta: {
+                current_page: page,
+                total_page: total,
+                page_size: size,
+            },
         }
     );
-
 });
 
 const addFavoriteRecipe = catchAsync(async (req, res) => {
@@ -369,49 +362,54 @@ const addFavoriteRecipe = catchAsync(async (req, res) => {
 
     const recipe = await prisma.recipe.findUnique({
         where: {
-            id: recipe_id
+            id: recipe_id,
         },
     });
 
     if (!recipe) {
-        throw new ApiError(httpStatus.NOT_FOUND, `No recipe found by id ${recipe_id}!`);
+        throw new ApiError(
+            httpStatus.NOT_FOUND,
+            `No recipe found by id ${recipe_id}!`
+        );
     }
 
     const favorite = await prisma.userFavorite.findFirst({
         where: {
             recipe_id,
-            user_id: userId
-        }
+            user_id: userId,
+        },
     });
 
     if (favorite) {
         return ApiResponse(
             res,
             httpStatus.OK,
-            "Recipe already exists in favorites",
+            "Recipe already exists in favorites"
         );
     }
 
     const user_favorite = await prisma.userFavorite.create({
         data: {
             recipe_id,
-            user_id: userId
+            user_id: userId,
         },
     });
 
     if (!user_favorite) {
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error adding recipe to favorites!");
+        throw new ApiError(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            "Error adding recipe to favorites!"
+        );
     }
 
     return ApiResponse(
         res,
         httpStatus.CREATED,
-        "Added recipe to favorites successfully",
+        "Added recipe to favorites successfully"
     );
-
 });
 
-export default { 
+export default {
     getRecipes,
     createRecipe,
     getRecipe,

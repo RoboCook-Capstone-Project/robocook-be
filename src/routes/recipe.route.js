@@ -23,12 +23,7 @@ recipeRouter
         recipeController.createRecipe
     );
 
-recipeRouter
-    .route("/toasty")
-    .get(
-        auth,
-        recipeController.getToasty
-    );
+recipeRouter.route("/toasty").get(auth, recipeController.getToasty);
 
 recipeRouter
     .route("/search")
@@ -68,6 +63,6 @@ recipeRouter
         auth,
         validate(recipeValidation.getRecipe),
         recipeController.getRecipe
-  );
+    );
 
 export default recipeRouter;
