@@ -153,7 +153,7 @@ const getToasty = catchAsync(async (req, res) => {
     recipe = recipe.at(0);
 
     if (!recipe) {
-        throw new ApiError(httpStatus.NOT_FOUND, "No recipe found!");
+        return ApiResponse(res, httpStatus.OK, "No recipe available yet!");
     }
 
     recipe.ingredients = recipe.ingredients.replaceAll("--", "\n");
