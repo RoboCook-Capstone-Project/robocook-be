@@ -17,11 +17,17 @@ app.use(cors());
 const multerMid = multer({
     storage: multer.memoryStorage(),
     limits: {
-        fileSize: 5 * 1024 * 1024,
+        fileSize: 1024 * 1024,
+    },
+    fileFilter: function (req, file, cb) {
+        if (file.mimetype != 'image/png' && file.mimetype != 'image/jpeg') {
+            return cb(new ApiError(httpStatus.UNSUPPORTED_MEDIA_TYPE, "Only .png, .jpg, and .jpeg format allowed!"))
+        }
+        cb(null,true)
     },
 });
 
-app.use(multerMid.array("file", 2));
+app.use(multerMid.single("image"));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
