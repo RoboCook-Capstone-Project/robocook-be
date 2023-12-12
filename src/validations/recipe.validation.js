@@ -36,13 +36,6 @@ const fusionRecipes = {
     }),
 };
 
-const getFavorites = {
-    query: Joi.object().keys({
-        page: Joi.number().integer(),
-        size: Joi.number().integer(),
-    }),
-};
-
 const addFavoriteRecipe = {
     body: Joi.object().keys({
         recipe_id: Joi.number().integer().required(),
@@ -55,6 +48,5 @@ export default {
     getRecipe,
     searchRecipes,
     fusionRecipes,
-    getFavorites,
     addFavoriteRecipe,
 };
