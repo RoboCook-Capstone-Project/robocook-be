@@ -291,31 +291,17 @@ const getFusionRecipes = catchAsync(async (req, res) => {
 
 const getFavorites = catchAsync(async (req, res) => {
     const userId = req.user_id;
-    let { page = 1, size = 10 } = req.query;
 
-    page = parseInt(page);
-    size = parseInt(size);
+    const result = await prisma.userFavorite.findMany({
+        where: {
+            user_id: userId,
+        },
+        select: {
+            recipe: true,
+        },
+    });
 
-    const result = await prisma.$transaction([
-        prisma.userFavorite.findMany({
-            take: size,
-            skip: (page - 1) * size,
-            where: {
-                user_id: userId,
-            },
-            select: {
-                recipe: true,
-            },
-        }),
-
-        prisma.userFavorite.count({
-            where: {
-                user_id: userId,
-            },
-        }),
-    ]);
-
-    const recipes = result[0].map((favorite) => ({
+    const recipes = result.map((favorite) => ({
         id: favorite.recipe.id,
         title: favorite.recipe.title,
         author: favorite.recipe.author_id,
@@ -335,9 +321,9 @@ const getFavorites = catchAsync(async (req, res) => {
             },
         });
         recipe.author = author.name;
+        recipe.ingredients = recipe.ingredients.replaceAll("--", "\n");
+        recipe.steps = recipe.steps.replaceAll("--", "\n");
     }
-
-    const total = Math.ceil(result[1] / size);
 
     return ApiResponse(
         res,
@@ -347,11 +333,6 @@ const getFavorites = catchAsync(async (req, res) => {
             : "No favorite recipes yet!",
         {
             recipeList: recipes,
-            pageMeta: {
-                current_page: page,
-                total_page: total,
-                page_size: size,
-            },
         }
     );
 });
