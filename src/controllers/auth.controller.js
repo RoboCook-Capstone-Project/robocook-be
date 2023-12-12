@@ -36,7 +36,7 @@ const register = catchAsync(async (req, res) => {
     });
 
     return ApiResponse(res, httpStatus.CREATED, "Success register user!", {
-        user,
+        registerResult: user,
     });
 });
 
@@ -58,7 +58,7 @@ const login = catchAsync(async (req, res) => {
     user.token = await tokenService.generateAuthTokens(user);
 
     return ApiResponse(res, httpStatus.OK, "Success login!", {
-        user,
+        loginResult: user,
     });
 });
 
