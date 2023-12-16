@@ -44,6 +44,11 @@ const getRecipes = catchAsync(async (req, res) => {
         steps: recipe.steps,
     }));
 
+    recipes.forEach((recipe) => {
+        recipe.ingredients = recipe.ingredients.replaceAll("--", "\n");
+        recipe.steps = recipe.steps.replaceAll("--", "\n");
+    });
+
     const total = Math.ceil(result[1] / size);
 
     return ApiResponse(res, httpStatus.OK, "Success get recipes data!", {
