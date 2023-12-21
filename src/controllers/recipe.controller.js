@@ -4,6 +4,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 import catchAsync from "../utils/catchAsync.js";
 import ApiError from "../utils/ApiError.js";
 import { uploadObject } from "../utils/cloudStorage.js";
+import axios from "axios";
 
 const prisma = new PrismaClient();
 
@@ -14,14 +15,50 @@ const getRecipes = catchAsync(async (req, res) => {
     page = parseInt(page);
     size = parseInt(size);
 
-    // TODO: Validate user id token!!
+    const userFavorites = await prisma.userFavorite.findMany({
+        where: {
+            user_id: userId,
+        },
+        select: {
+            recipe_id: true,
+        },
+    });
 
-    // TODO: Get result from ML model
+    const start = (page - 1) * size + 1;
+    const end = page * size;
+
+    const i = Math.floor(start / 100);
+    const newStart = start % 100 === 0 ? 100 : start % 100;
+    const newEnd = end % 100 === 0 ? 100 : end % 100;
+    let recipeId = 1;
+
+    if (i < userFavorites.length) {
+        recipeId = userFavorites[i].recipe_id;
+    } else {
+        recipeId = Math.floor(Math.random() * 15643 + 1);
+    }
+
+    let recipeIdsResult = [];
+
+    try {
+        const response = await axios.get(
+            `${process.env.ML_SERVER_URL}/api/recipe-model/fyp?recipe_id=${recipeId}&start=${newStart}&end=${newEnd}`
+        );
+        recipeIdsResult = response.data;
+    } catch (e) {
+        throw new ApiError(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            "There are some error, please try again later!"
+        );
+    }
 
     const result = await prisma.$transaction([
         prisma.recipe.findMany({
-            take: size,
-            skip: (page - 1) * size,
+            where: {
+                id: {
+                    in: recipeIdsResult,
+                },
+            },
             select: {
                 id: true,
                 title: true,
@@ -255,27 +292,63 @@ const getFusionRecipes = catchAsync(async (req, res) => {
     let { first_recipe_id: firstRecipeId, second_recipe_id: secondRecipeId } =
         req.query;
 
-    firstRecipeId = parseInt(firstRecipeId);
-    secondRecipeId = parseInt(secondRecipeId);
+    const recipeIds = [parseInt(firstRecipeId), parseInt(secondRecipeId)];
 
-    const result = await prisma.$transaction([
-        prisma.recipe.findMany({
-            take: 10,
-            skip: 0,
-            select: {
-                id: true,
-                title: true,
-                ingredients: true,
-                steps: true,
-                image_url: true,
-                author: true, // Include the author details
+    const recipeIngredients = await prisma.recipe.findMany({
+        where: {
+            id: {
+                in: recipeIds,
             },
-        }),
+        },
+        select: {
+            ingredients: true,
+        },
+    });
 
-        prisma.recipe.count(),
-    ]);
+    const ingredient1 =
+        recipeIngredients.length > 0
+            ? recipeIngredients[0].ingredients
+            : "Ayam Ikan Daging Telur";
+    const ingredient2 =
+        recipeIngredients.length > 1
+            ? recipeIngredients[1].ingredients
+            : "Kambing Sapi Udang Tahu Tempe Tofu";
 
-    const recipes = result[0].map((recipe) => ({
+    let recipeIdsResult = [];
+
+    try {
+        const response = await axios.post(
+            `${process.env.ML_SERVER_URL}/api/recipe-model/fusion`,
+            {
+                ingredient1,
+                ingredient2,
+            }
+        );
+        recipeIdsResult = response.data;
+    } catch (e) {
+        throw new ApiError(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            "There are some error, please try again later!"
+        );
+    }
+
+    const result = await prisma.recipe.findMany({
+        where: {
+            id: {
+                in: recipeIdsResult,
+            },
+        },
+        select: {
+            id: true,
+            title: true,
+            ingredients: true,
+            steps: true,
+            image_url: true,
+            author: true, // Include the author details
+        },
+    });
+
+    const recipes = result.map((recipe) => ({
         id: recipe.id,
         title: recipe.title,
         author: recipe.author?.name || null,
@@ -283,6 +356,11 @@ const getFusionRecipes = catchAsync(async (req, res) => {
         ingredients: recipe.ingredients,
         steps: recipe.steps,
     }));
+
+    recipes.forEach((recipe) => {
+        recipe.ingredients = recipe.ingredients.replaceAll("--", "\n");
+        recipe.steps = recipe.steps.replaceAll("--", "\n");
+    });
 
     return ApiResponse(
         res,
